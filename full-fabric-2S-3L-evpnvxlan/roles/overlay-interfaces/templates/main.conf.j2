@@ -1,0 +1,126 @@
+
+interfaces {
+
+{% if overlay.bundle_ports is defined %}
+{% for interface in overlay.bundle_ports %}
+    {{ interface.name }} {
+{% if interface.description is defined %}
+        description "to {{ interface.description }}";
+{% endif %}
+{% if interface.bundle is defined %}
+        ether-options {
+            802.3ad {{ interface.bundle }};
+        }
+{% endif %}
+    }
+{% endfor %}
+{% endif %}
+
+{% for interface in overlay.interfaces %}
+    {{ interface.name }} {
+{% if interface.description is defined %}
+        description "to {{ interface.description }}";
+{% endif %}
+{% if interface.native_vlan is defined %}
+        native-vlan-id {{ interface.native_vlan }};
+{% endif %}
+{% if interface.aggregate is defined and interface.aggregate == True%}
+{% if interface.multihomed is defined %}
+        aggregated-ether-options {
+            lacp {
+                active;
+                system-id {{ interface.multihomed.lacp_id }};
+            }
+        }
+        esi {
+            {{ interface.multihomed.esi }};
+            all-active;
+        }
+{% else %}
+        aggregated-ether-options {
+            lacp {
+                active;
+            }
+        }
+{% endif %}     
+{% endif %}
+{% if interface.type == "trunk" %}
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+{% for vlan in interface.vlans %}
+                    members {{ vlan.name }};
+{% endfor %}
+                }
+            }    
+        }
+{% elif interface.type == "access" %}
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+{% for vlan in interface.vlans %}
+                    members {{ vlan.name }};
+{% endfor %}
+                }
+            }    
+        }
+{% endif %}
+    }
+{% endfor %}
+}
+
+
+{% for vlan in overlay.vlans %}
+vlans {
+    {{ vlan.name }} {
+{% if vlan.id is defined %}
+        vlan-id {{ vlan.id }};
+{% endif %}
+{% if vlan.vxlan is defined %}
+        vxlan {
+            vni {{ vlan.vxlan }};
+            ingress-node-replication;
+        }
+{% endif %}
+    }
+}
+{% if vlan.irb is defined %}
+interfaces {
+    irb {
+        unit {{ vlan.id }} {
+            proxy-macip-advertisement;
+            virtual-gateway-accept-data;
+{% if vlan.irb.local_ip is defined and vlan.irb.virtual_ip is defined %}
+            family inet {
+                address {{ vlan.irb.local_ip }} {
+                    virtual-gateway-address {{ vlan.irb.virtual_ip }};
+                }
+            }
+{% elif vlan.irb.local_ip is defined %}
+            family inet {
+                address {{ vlan.irb.local_ip }};
+            }
+{% endif %}
+{% if vlan.irb.virtual_mac is defined %}
+            virtual-gateway-v4-mac {{ vlan.irb.virtual_mac }};
+{% endif %}
+        }
+    }
+}
+vlans {
+    {{ vlan.name }} {
+        l3-interface irb.{{ vlan.id }};
+    }
+}
+{% endif %}
+{% if vlan.irb.virtual_ip is defined %}
+protocols {
+    evpn {
+        default-gateway no-gateway-community
+    }
+}
+{% endif %}
+{% endfor %}
+

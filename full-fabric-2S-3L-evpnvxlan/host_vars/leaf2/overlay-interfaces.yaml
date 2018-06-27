@@ -1,0 +1,47 @@
+
+overlay:
+    vlans:
+      - name: vlan100
+        id: 100
+        vxlan: 100
+        irb:
+          local_ip: "192.168.1.252/24"
+          virtual_ip: "192.168.1.254"
+          virtual_mac: "00:11:11:11:11:11"
+      - name: vlan200
+        id: 200
+        vxlan: 200
+        irb:
+          local_ip: "192.168.2.252/24"
+          virtual_ip: "192.168.2.254"
+          virtual_mac: "00:22:22:22:22:22"
+
+    bundle_ports:
+      - name: xe-0/0/2
+        description: "server1 eth2"
+        bundle: ae1
+      - name: xe-0/0/3
+        description: "server2 eth2"
+        bundle: ae2
+
+    interfaces:
+      - name: ae1
+        description: "server1 bond0"
+        aggregate: True
+        multihomed:
+            lacp_id: "00:00:00:11:11:11"
+            esi: "00:00:00:00:00:11:11:11:11:11"
+        native_vlan: 100
+        type: "trunk"
+        vlans:
+          - name: vlan100
+
+      - name: ae2
+        description: "server2 bond0"
+        aggregate: True
+        multihomed:
+            lacp_id: "00:00:00:22:22:22"
+            esi: "00:00:00:00:00:22:22:22:22:22"
+        type: "access"
+        vlans:
+          - name: vlan200

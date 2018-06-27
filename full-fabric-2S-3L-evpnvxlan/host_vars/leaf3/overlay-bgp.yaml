@@ -1,0 +1,13 @@
+
+overlay:
+    local:
+        asn: 65000
+        ip: "1.1.1.13"
+        rd: "1.1.1.13:1"
+        rt: "65000:1"
+
+    bgp_neighbors:
+      - name: leaf1
+        peer_ip: "1.1.1.11"
+      - name: leaf2
+        peer_ip: "1.1.1.12"

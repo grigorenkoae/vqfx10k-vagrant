@@ -1,0 +1,31 @@
+
+overlay:
+    vlans:
+      - name: vlan100
+        id: 100
+        vxlan: 100
+        irb:
+          local_ip: "192.168.1.253/24"
+          virtual_ip: "192.168.1.254"
+          virtual_mac: "00:11:11:11:11:11"
+      - name: vlan200
+        id: 200
+        vxlan: 200
+        irb:
+          local_ip: "192.168.2.253/24"
+          virtual_ip: "192.168.2.254"
+          virtual_mac: "00:22:22:22:22:22"
+
+    interfaces:
+      - name: xe-0/0/2
+        description: "server3 eth1"
+        type: "access"
+        vlans:
+          - name: vlan100
+
+      - name: xe-0/0/3
+        description: "server4 eth1"
+        native_vlan: 200
+        type: "trunk"
+        vlans:
+          - name: vlan200

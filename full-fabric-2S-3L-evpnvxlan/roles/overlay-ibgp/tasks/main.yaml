@@ -1,0 +1,5 @@
+---
+- name: Building overlay BGP configuration for Junos
+  template: >
+    src=main.conf.j2
+    dest={{ build_dir }}/junos-overlay-bgp.conf.part

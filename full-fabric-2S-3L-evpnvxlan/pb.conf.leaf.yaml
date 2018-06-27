@@ -1,0 +1,11 @@
+---
+- name: Create and apply configuration for leaf
+  hosts: leaf
+  connection: local
+  gather_facts: no
+  roles:
+    - vagrant-base
+    - underlay-ebgp
+    - overlay-interfaces
+    - overlay-ibgp
+    - build-config

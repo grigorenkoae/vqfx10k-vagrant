@@ -1,0 +1,5 @@
+---
+- name: Building overlay interfaces configuration for Junos
+  template: >
+    src=main.conf.j2
+    dest={{ build_dir }}/junos-overlay-int.conf.part

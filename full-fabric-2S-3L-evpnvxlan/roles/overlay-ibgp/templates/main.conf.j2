@@ -1,0 +1,38 @@
+
+protocols {
+    evpn {
+        encapsulation vxlan;
+        extended-vni-list all;
+        multicast-mode ingress-replication;
+    }
+    bgp {
+        group overlay {
+{% if overlay.local.asn is defined %}
+            local-as {{ overlay.local.asn }};
+{% endif %}
+            type internal;
+            local-address {{ overlay.local.ip }};
+            family evpn {
+                signaling;
+            }
+            multipath;
+{% for neighbor in overlay.bgp_neighbors %}
+            neighbor {{ neighbor.peer_ip }};
+{% endfor %}
+        }
+    }
+}
+
+{% if overlay.local.asn is defined %}
+routing-options {                       
+    autonomous-system {{ overlay.local.asn }};                                 
+}
+{% endif %}
+
+switch-options {
+    service-id 1;
+    vtep-source-interface lo0.0;
+    route-distinguisher {{ overlay.local.rd }};
+    vrf-target target:{{ overlay.local.rt }};
+    vrf-target auto;
+}

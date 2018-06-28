@@ -36,3 +36,13 @@ switch-options {
     vrf-target target:{{ overlay.local.rt }};
     vrf-target auto;
 }
+
+policy-options {
+    policy-statement bgp-ipclos-out {
+        term server {
+            from {
+                protocol evpn;
+            }
+        }
+    }
+}

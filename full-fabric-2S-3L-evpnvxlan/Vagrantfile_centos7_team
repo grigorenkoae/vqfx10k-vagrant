@@ -188,19 +188,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             echo 'BOOTPROTO=none' >> /etc/sysconfig/network-scripts/ifcfg-team0
             echo 'IPADDR=192.168.#{id}.#{id}' >> /etc/sysconfig/network-scripts/ifcfg-team0
             echo 'PREFIX=24' >> /etc/sysconfig/network-scripts/ifcfg-team0
-            echo 'TEAM_CONFIG='"'"'{"runner": {"name": "lacp", "active": true, "fast_rate": true, "tx_hash": ["eth", "ipv4"]}, "link_watch": {"name": "ethtool"}}'"'" >> /etc/sysconfig/network-scripts/ifcfg-team0
+            echo 'TEAM_CONFIG='"'"'{"runner": {"name": "lacp", "active": true, "fast_rate": true, "tx_hash": ["eth", "ipv4"]}, "link_watch": {"name": "ethtool"}, "ports": {"eth1": {}, "eth2": {}}}'"'" >> /etc/sysconfig/network-scripts/ifcfg-team0
             echo 'DEVICE=eth1' >> /etc/sysconfig/network-scripts/ifcfg-eth1
             echo 'ONBOOT=yes' >> /etc/sysconfig/network-scripts/ifcfg-eth1
             echo 'DEVICETYPE=TeamPort' >> /etc/sysconfig/network-scripts/ifcfg-eth1
             echo 'USERCTL=no' >> /etc/sysconfig/network-scripts/ifcfg-eth1
             echo 'TEAM_MASTER=team0' >> /etc/sysconfig/network-scripts/ifcfg-eth1
-            echo 'TEAM_PORT_CONFIG='"'"'{"prio": 100}'"'" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+            echo 'TEAM_PORT_CONFIG='"'"'{"prio": 100, "link_watch": {"name": "ethtool"}}'"'" >> /etc/sysconfig/network-scripts/ifcfg-eth1
             echo 'DEVICE=eth2' >> /etc/sysconfig/network-scripts/ifcfg-eth2
             echo 'ONBOOT=yes' >> /etc/sysconfig/network-scripts/ifcfg-eth2
             echo 'DEVICETYPE=TeamPort' >> /etc/sysconfig/network-scripts/ifcfg-eth2
             echo 'USERCTL=no' >> /etc/sysconfig/network-scripts/ifcfg-eth2
             echo 'TEAM_MASTER=team0' >> /etc/sysconfig/network-scripts/ifcfg-eth2
-            echo 'TEAM_PORT_CONFIG='"'"'{"prio": 100}'"'" >> /etc/sysconfig/network-scripts/ifcfg-eth2
+            echo 'TEAM_PORT_CONFIG='"'"'{"prio": 100, "link_watch": {"name": "ethtool"}}'"'" >> /etc/sysconfig/network-scripts/ifcfg-eth2
             echo '192.168.0.0/16 via 192.168.#{id}.254 dev team0' >> /etc/sysconfig/network-scripts/route-team0
             reboot
             SCRIPT
@@ -228,6 +228,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             # Configure route
             $script = <<-SCRIPT
             sudo su
+            sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+            sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=0
             echo '192.168.0.0/16 via 192.168.#{id-2}.254 dev eth1' >> /etc/sysconfig/network-scripts/route-eth1
             reboot
             SCRIPT
